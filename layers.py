@@ -23,11 +23,9 @@ class GraphConvolution(Module):
 
     # output updated features matrix [without nonlinear activation]
     def forward(self, input, adj):
-        # TODO: remove hardcoded D^-1 array
-        D = torch.FloatTensor(np.array(
-            [[1/3, 0, 0],
-             [0, 1/2, 0],
-             [0, 0, 1/2]]))
+        degrees = np.sum(adj.numpy(), axis=0)
+        degrees_inverse = [1 / degrees[i] for i in range(3)]
+        D = torch.FloatTensor(np.diagflat(degrees_inverse))
         # weighted input
         D_tilde = torch.sqrt(D)
         weighted_avg = D_tilde @ adj
