@@ -1,5 +1,5 @@
 # MolecularPESGCN
-utils_new - file containing functions to load data and create neccesarry matrices
+utils - file containing functions to load data and create neccesarry matrices
 
 train - trains model
 
