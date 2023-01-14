@@ -3,38 +3,29 @@ from __future__ import print_function
 
 import time
 import numpy as np
-import random
 
 import torch
 import torch.optim as optim
 
-from utils_new import load_data
+from sklearn.model_selection import train_test_split
+from ase.io.trajectory import TrajectoryReader as tr
+
+from utils import load_data
 from models import GCN
 
+np.random.seed(1)
 
-# Load data
-adj, features, y = load_data()
-lst = list(zip(features, y))
+# atoms dataset
+images = tr("dft_pyscf_ase_force.traj")
 
-# TODO: fix random shuffling
-# random shuffling here breaks and returns array of all zeroes
-random.seed(42)
-random.shuffle(lst)
+# apply random shuffle to dataset
+index = np.arange(len(images), dtype=int)
+np.random.shuffle(index)
+images_shuffled = [images[idx] for idx in index]
 
-# TODO: add validation sets
-# hardcoded numbers to be near 60-40 split for now, use scikit train, test, val split function later
-train_X = torch.FloatTensor(np.array(np.zeros((7637, 3, 3))))
-train_y = torch.FloatTensor(np.array(np.zeros(7637)))
-test_X = torch.FloatTensor(np.array(np.zeros((4364, 3, 3))))
-test_y = torch.FloatTensor(np.array(np.zeros(4364)))
-
-for idx, (X_val, y_val) in enumerate(lst):
-    if idx < 4364:
-        test_X[idx] = X_val
-        test_y[idx] = y_val
-    else:
-        train_X[idx - 4364] = X_val
-        train_y[idx - 4364] = y_val
+# load data
+adj, X, y = load_data(images_shuffled)
+train_X, test_X, train_y, test_y = train_test_split(X, y, train_size=.7, random_state=42, shuffle=False)
 
 # Model and optimizer
 model = GCN(nfeat=3,
@@ -61,11 +52,11 @@ for epoch in range(200):
     optimizer.zero_grad()
     metric = torch.nn.MSELoss()
     pred_output = model(train_X, adj)
-    loss_train = torch.sqrt(metric(train_y, pred_output))
+    loss_train = metric(train_y, pred_output)
     loss_train.backward()
     optimizer.step()
     print('Epoch: {:04d}'.format(epoch + 1),
-          'loss_train: {:.4f}'.format(loss_train.item()),
+          'training_loss: {:.4f}'.format(loss_train.item()),
           'time: {:.4f}s'.format(time.time() - t))
 
 print("Optimization Finished!")
