@@ -7,4 +7,5 @@ layers - defines GCN layer
 
 model - defines specific model used
 
-dft_pyscf_ase_force.traj - dataset, all y values of atoms are set to 7.55 (no angle changes between configurations)
+dft_pyscf_ase_force.traj* - dataset, all y values of atoms are set to 7.55 (no angle changes between configurations)
+*uploaded as zip to fit GitHub size limit
