@@ -25,10 +25,11 @@ class GraphConvolution(Module):
     def forward(self, input, adj):
         degrees = np.sum(adj.numpy(), axis=0)
         degrees_inverse = [1 / degrees[i] for i in range(3)]
-        D = torch.FloatTensor(np.diagflat(degrees_inverse))
+        inv_D = torch.FloatTensor(np.diagflat(degrees_inverse))
+        reg_D = torch.FloatTensor(np.diagflat(degrees))
         # weighted input
-        D_tilde = torch.sqrt(D)
-        weighted_avg = D_tilde @ adj
+        D_tilde = torch.sqrt(reg_D)
+        weighted_avg = torch.sqrt(inv_D) @ adj
         weighted_avg *= adj @ D_tilde
         support = input @ self.weight
         # weighted average

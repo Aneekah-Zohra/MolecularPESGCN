@@ -13,7 +13,7 @@ from ase.io.trajectory import TrajectoryReader as tr
 from utils import load_data
 from models import GCN
 
-np.random.seed(1)
+np.random.seed(42)
 
 # atoms dataset
 images = tr("dft_pyscf_ase_force.traj")
@@ -29,9 +29,9 @@ train_X, test_X, train_y, test_y = train_test_split(X, y, train_size=.7, random_
 
 # Model and optimizer
 model = GCN(nfeat=3,
-            nhid=16)
+            nout=1)
 optimizer = optim.Adam(model.parameters(),
-                       lr=.001)
+                       lr=.1)
 
 
 def test():
@@ -47,12 +47,12 @@ def test():
 
 # Train model
 t_total = time.time()
-for epoch in range(200):
+for epoch in range(100):
     t = time.time()
     optimizer.zero_grad()
     metric = torch.nn.MSELoss()
     pred_output = model(train_X, adj)
-    loss_train = metric(train_y, pred_output)
+    loss_train = torch.sqrt(metric(train_y, pred_output))
     loss_train.backward()
     optimizer.step()
     print('Epoch: {:04d}'.format(epoch + 1),

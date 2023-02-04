@@ -1,5 +1,5 @@
-import math
 import numpy as np
+import math
 import torch
 
 
@@ -27,13 +27,11 @@ def update_pos(pos_arr):
 
 def load_trajs(traj_arr):
     X = np.empty((12001, 3, 3))
-    y = np.empty((12001,))
+    y = np.empty((12001, 1))
     for i in range(len(traj_arr)):
         atom = traj_arr[i]
-        pos = atom.get_positions()
-
         # set oxygen to be reference point
-        X[i] = update_pos(pos)
+        X[i] = update_pos(atom.get_positions())
         y[i] = atom.get_calculator().get_potential_energy()
     return X, y
 
@@ -49,3 +47,8 @@ def load_data(traj_arr):
                     [1, 0, 0]])
     adj = torch.FloatTensor(adj + np.eye(3))
     return adj, X, y
+
+
+def gmean(input_x, dim):
+    log_x = torch.log(input_x)
+    return torch.exp(torch.mean(log_x, dim=dim))
